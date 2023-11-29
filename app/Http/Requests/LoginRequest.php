@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreIp_listRequest extends FormRequest
+class LoginRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,7 +22,8 @@ class StoreIp_listRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+                'phone' => 'required',
+                'password' => 'required',
         ];
     }
 }

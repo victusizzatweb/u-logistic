@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\CurrencyController;
+use App\Http\Controllers\MyAutoController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +18,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get("my_autos",[MyAutoController::class,"index"]);
+Route::get('/currency', [CurrencyController::class, 'getExchangeRates']);
+Route::get('/filtered', [CurrencyController::class, 'getFilteredExchangeRates']);
+Route::get('/currency/{id}', [CurrencyController::class, 'show']);

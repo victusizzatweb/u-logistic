@@ -13,24 +13,33 @@ class IpListController extends Controller
      */
     public function index()
     {
-        //
+        return Ip_list::all();
     }
+    
+public function store(StoreIp_listRequest $request)
+{
+    
+    $data = $request->validate([
+        'full_address' => 'required',
+        'mac_address' => 'required',
+        'phone_model' => 'required',
+        'last_seen' => 'required', // Assuming last_seen is a datetime
+    ]);
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+    $ipList = new Ip_list;
+    $ipList->full_address = $data['full_address'];
+    $ipList->mac_address = $data['mac_address'];
+    $ipList->phone_model = $data['phone_model'];
+    $ipList->last_seen = $data['last_seen'];
+    $ipList->save();
+//  return "qoshdim";
+    return response()->json([
+        'message' => 'New IP record created successfully',
+        'data' => $ipList,
+    ], 201);
+}
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreIp_listRequest $request)
-    {
-        //
-    }
+
 
     /**
      * Display the specified resource.

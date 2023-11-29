@@ -13,26 +13,33 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        Role::create([
-            "name" =>[
-                "uz"=> "Haydovchi",
-                "ru"=> "Водитель",
-                "en"=> "Driver",
-            ]
-            ]);
-            Role::create([
-                "name" =>[
-                    "uz"=> "Mijoz",
-                    "ru"=> "Клиент",
-                    "en"=> "Customer",
-                ]
-                ]);
-                Role::create([
-                    "name" =>[
-                        "uz"=> "Operator",
-                        "ru"=> "Оператор",
-                        "en"=> "Operator",
-                    ]
-                    ]);
+        // Role::create([
+        //     "name" =>[
+        //         "uz"=> "Haydovchi",
+        //         "ru"=> "Водитель",
+        //         "en"=> "Driver",
+        //     ]
+        //     ]);
+        //     Role::create([
+        //         "name" =>[
+        //             "uz"=> "Mijoz",
+        //             "ru"=> "Клиент",
+        //             "en"=> "Customer",
+        //         ]
+        //         ]);
+        //         Role::create([
+        //             "name" =>[
+        //                 "uz"=> "Operator",
+        //                 "ru"=> "Оператор",
+        //                 "en"=> "Operator",
+        //             ]
+        //             ]);
+        //             Role::create([
+        //                 "name" =>[
+        //                     "uz"=> "Admin",
+        //                     "ru"=> "Admin",
+        //                     "en"=> "Admin",
+        //                 ]
+        //                 ]);
     }
 }

@@ -11,15 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('tex_passports', function (Blueprint $table) {
             $table->id();
-            $table->string('fullname');
-            $table->string('phone');
-            $table->string('status')->default('pending');
-            $table->string('token')->nullable();
-            $table->text('role_id');
-            $table->string('password')->nullable();
-            $table->rememberToken();
+            $table->integer("user_id");
+            $table->string('image');
+            $table->string('id_number');
             $table->timestamps();
         });
     }
@@ -29,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('tex_passports');
     }
 };

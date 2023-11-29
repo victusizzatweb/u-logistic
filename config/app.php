@@ -163,6 +163,9 @@ return [
         /*
          * Application Service Providers...
          */
+        
+        //  Nexmo\Laravel\NexmoServiceProvider::class,
+        
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
@@ -183,6 +186,7 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'Example' => App\Facades\Example::class,
+        // 'Nexmo' => Nexmo\Laravel\Facade\Nexmo::class,
     ])->toArray(),
 
 ];
