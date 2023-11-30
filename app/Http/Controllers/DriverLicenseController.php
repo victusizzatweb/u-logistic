@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Driver_license;
-use Auth;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 class DriverLicenseController extends Controller
 {
     /**
@@ -13,7 +12,10 @@ class DriverLicenseController extends Controller
      */
     public function index()
     {
-        //
+        $driverLicense = Driver_license::all();
+        return  response()->json([
+            "data"=>$driverLicense
+        ]);
     }
 
     /**
@@ -38,8 +40,10 @@ class DriverLicenseController extends Controller
         ]);
 
         // Get the authenticated user
-        $user_id = Auth::id();
-        dd($user_id);
+        $user_id = Auth::check();
+        // dd($user_id);
+        $driverLicense = Driver_license::where("user_id",$user_id)->first();
+        // dd($driverLicense);
 
         // Create a new instance of the DriverLicense model
         $driverLicense = new Driver_license;
@@ -57,9 +61,9 @@ class DriverLicenseController extends Controller
 
         // Save the model to the database
         $driverLicense->save();
-
+        // dd($driverLicense);
         // Optionally, you can redirect to a different page or return a response
-        return redirect()->json([
+        return response()->json([
             "success"=> 'Driver license created successfully',
             "data"=>$driverLicense
         ]);

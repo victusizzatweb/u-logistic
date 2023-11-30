@@ -57,7 +57,7 @@ class UserController extends Controller
                 try {
                     $payload = [
                         'mobile_phone' => $request->phone,
-                        'message' => "Assalomu alekum .".$code,
+                        'message' => "Assalomu alekum .".$validatedData['fullname']." sizning code raqamingiz .".$code,
                         'from' => '4546',
                     ];
         
