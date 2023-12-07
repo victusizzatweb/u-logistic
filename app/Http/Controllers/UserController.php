@@ -44,7 +44,12 @@ class UserController extends Controller
         $role = Role::where("id",$request->role_id)->first();
         $code = rand(10000,99999);
         $user = User::where('phone',$request->phone)->first();
-        if($request->password == $request->password2){
+        if($user){
+            return response([
+                'success'=>'Siz royxatdan otgansiz',
+                "error"=>403
+            ]);
+        }
            $user = User::create([
                 'fullname' => $validatedData['fullname'],
                 'phone' => $validatedData['phone'],
@@ -79,21 +84,18 @@ class UserController extends Controller
                     return response()->json([
                         'message' => 'Sms yuborildi',
                         "data"=>$smsCode,
-                        "data2"=>$user
+                        "data2"=>$user,200
                 ]);
                 } catch (\Exception $e) {
                     return response()->json(['error' => 'Xato: ' . $e->getMessage()], 400);
                 }
             }else{
                     return response([
-                        'message'=>'tel raqam xato'
+                        'success'=>'Tel raqam xato',
+                        "error"=>403
                     ]);
                 }
-        } else{
-            return response([
-                'message'=>'parol xato'
-            ]);
-        }
+       
         
         
        

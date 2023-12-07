@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AnnouncementsController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DriverLicenseController;
 use App\Http\Controllers\MyAutoController;
 use App\Http\Controllers\AuthController;
@@ -42,7 +44,9 @@ Route::apiResources([
   "my_autos"=>MyAutoController::class,
   "passport"=>PassportController::class,
   "texPassport"=>TexPassportController::class,
-  "driverLicense"=>DriverLicenseController::class
+  "driverLicense"=>DriverLicenseController::class,
+  "comment"=>CommentController::class,
+  "announcements"=>AnnouncementsController::class
 ]);
 Route::post('get_token', [UserController::class, 'get_token']);
 Route::post('user/{id}', [UserController::class, 'update']);

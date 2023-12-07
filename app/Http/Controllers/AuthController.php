@@ -16,13 +16,16 @@ class AuthController extends Controller
     $user = User::where('phone', $request->phone)->first();
  
     if (! $user || ! Hash::check($request->password, $user->password)) {
-        throw ValidationException::withMessages([
-            'phone' => ['The provided credentials are incorrect.'],
-        ]);
+       
+       
     }
+
     
     
-    $accessToken = $user->createToken($request->phone)->plainTextToken;
+     if ( $user ) {
+        if(Hash::check($request->password, $user->password)){
+       
+        $accessToken = $user->createToken($request->phone)->plainTextToken;
 
    $user->update([
     "token"=>$accessToken,
@@ -30,8 +33,20 @@ class AuthController extends Controller
    $user->save();
 
     return response()->json([
-        'token' => $accessToken
+        'token' => $accessToken,200
     ]);
+}else{
+    return response()->json([
+        'success' => "Parol xato",
+        "error"=>403
+    ]);
+}
+    }else{
+        return response()->json([
+            'success' => "Not found",
+            "error"=>404
+        ]);
+    }
    }
    public function register(){
 
