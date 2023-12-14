@@ -4,9 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Driver_license;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Auth;
 class DriverLicenseController extends Controller
 {
+    public function  __construct(){
+
+        $this->middleware("auth:sanctum");
+
+    }
     /**
      * Display a listing of the resource.
      */
@@ -31,16 +36,17 @@ class DriverLicenseController extends Controller
      */
     public function store(Request $request)
     {
+        // dd($request);
         // Validate the incoming request data
         $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'certificate_number' => 'required|string',
-            'categories' => 'required|string',
+            'certificate_number' => 'required',
+            'categories' => 'required',
             // Add any additional validation rules for other fields
         ]);
 
         // Get the authenticated user
-        $user_id = Auth::check();
+        $user_id = Auth::id();
         // dd($user_id);
         $driverLicense = Driver_license::where("user_id",$user_id)->first();
         // dd($driverLicense);
@@ -56,7 +62,7 @@ class DriverLicenseController extends Controller
         // Handle image upload
         $image = md5(rand(1111, 9999) . microtime()) . '.' . $request->file('image')->extension();
         $request->file('image')->storeAs('/public/driverLicense_images/', $image);
-        $driverLicense->image = $image;
+        $driverLicense->image = '/storage/driverLicense_images/'.$image;
         
 
         // Save the model to the database
@@ -96,8 +102,16 @@ class DriverLicenseController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Driver_license $driver_license)
+    public function destroy(Driver_license $driver_license,$id)
     {
-        //
+        $driver_license = Driver_license::findOrFail($id);
+          
+        $driver_license->delete();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'User deleted successfully.'
+        ]);
     }
+    
 }

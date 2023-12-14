@@ -34,6 +34,7 @@ Route::put('roles/{id}', [RoleController::class, 'update']);
 // Route::get("authUser",[AuthController::class,"user"])->middleware('token');
 
 Route::post("login" ,[AuthController::class,"login"]);
+Route::post("logout" ,[AuthController::class,"logout"])->middleware('auth:sanctum');
 Route::post('/register',[UserController::class, 'register'])->name('user.register');
 Route::post('/smsCode',[UserController::class, 'smsCode'])->name('user.code');
 Route::apiResources([
@@ -49,10 +50,15 @@ Route::apiResources([
   "announcements"=>AnnouncementsController::class
 ]);
 Route::post('get_token', [UserController::class, 'get_token']);
+Route::post('forget_password', [UserController::class, 'forget_password']);
+
+Route::post('forget_password_update', [UserController::class, 'forget_password_update']);
+Route::get('driver', [UserController::class, 'driver']);
 Route::post('user/{id}', [UserController::class, 'update']);
 Route::post('my_autos/{id}', [MyAutoController::class, 'update']);
 Route::post('passport/{id}', [PassportController::class, 'update']);
 Route::post('texPassport/{id}', [TexPassportController::class, 'update']);
-// Route::get('/currency', [CurrencyController::class, 'getExchangeRates']);
+Route::post('announcements/{id}', [AnnouncementsController::class, 'update']);
+Route::get('customer_announcements', [AnnouncementsController::class, 'customer_announcements']);
 // Route::get('/currency/{id}', [CurrencyController::class, 'show']);
 // Route::get('/filtered', [CurrencyController::class, 'getFilteredExchangeRates']);

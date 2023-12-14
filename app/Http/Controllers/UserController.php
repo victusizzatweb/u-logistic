@@ -30,26 +30,34 @@ class UserController extends Controller
     {
         return User::all();
     }
+    public function driver()
+    {
+        $result = User::where('role_id','Haydovchi')->get();
+        return response()->json([
+            "data"=>$result
+        ]);
+    }
 
     public function register(Request $request)
     {
+        
         // Validate the request data
         $validatedData = $request->validate([
             'fullname' => 'required|string',
             'phone' => 'required|string',
             'role_id' => 'required',
             'password' => 'required',
-            'password2' => 'required',
         ]);
+        // dd($request);
         $role = Role::where("id",$request->role_id)->first();
-        $code = rand(10000,99999);
+        // $code = rand(10000,99999);
+        $code = 55555;
         $user = User::where('phone',$request->phone)->first();
-        if($user){
-            return response([
-                'success'=>'Siz royxatdan otgansiz',
-                "error"=>403
-            ]);
-        }
+        // if($user){
+        //     return response([
+        //         'success'=>'Siz royxatdan otgansiz',
+        //     ],403);
+        // }
            $user = User::create([
                 'fullname' => $validatedData['fullname'],
                 'phone' => $validatedData['phone'],
@@ -68,38 +76,124 @@ class UserController extends Controller
         
                     $bearerToken = $this->getToken();
         
-                    $response = Http::withHeaders([
-                        'Authorization' => "Bearer $bearerToken",
-                    ])->post($url, $payload);
+                    // $response = Http::withHeaders([
+                    //     'Authorization' => "Bearer $bearerToken",
+                    // ])->post($url, $payload);
         
-                    if ($response->status() == 401) {
-                        $bearerToken = $this->getToken()['data']['token'];
-                        file_put_contents('tokenfile.txt', $bearerToken);
-                    }
+                    // if ($response->status() == 401) {
+                    //     $bearerToken = $this->getToken()['data']['token'];
+                    //     file_put_contents('tokenfile.txt', $bearerToken);
+                    // }
                     $smsCode = new SmsCode;
                     $smsCode->user_id = $user->id;
                     $smsCode->phone = $request->phone;
                     $smsCode->code = $code;
                     $smsCode->save();
+                    $responseData = [
+                        'user_id' => $user->id,
+                        'code' => $code,
+                        'phone' => $request->phone,
+                        'name' => $validatedData['fullname'],
+                    ];
                     return response()->json([
                         'message' => 'Sms yuborildi',
-                        "data"=>$smsCode,
-                        "data2"=>$user,200
-                ]);
+                        "data"=>$responseData,
+                ],200);
                 } catch (\Exception $e) {
                     return response()->json(['error' => 'Xato: ' . $e->getMessage()], 400);
                 }
             }else{
                     return response([
                         'success'=>'Tel raqam xato',
-                        "error"=>403
-                    ]);
+                        
+                    ],403);
                 }
        
-        
-        
-       
     }
+    public function forget_password(Request $request)
+{
+    // Validate the request data
+     $request->validate([
+        'phone' => 'required|string'
+    ]);
+
+    // Generate a random code
+    $code = rand(10000, 99999);
+
+    // Find the user by phone number
+    $user = User::where('phone', $request->phone)->first();
+
+    // Check if the user exists
+    if ($user) {
+        // Update the user's password
+        $user->update([
+            'password' => bcrypt($request->password), // Use bcrypt to hash the password
+        ]);
+
+        // Send the code via SMS
+        $url = "https://notify.eskiz.uz/api/message/sms/send";
+
+        try {
+            $payload = [
+                'mobile_phone' => $request->phone,
+                'message' => "Sizning kod raqamingiz: " . $code,
+                'from' => '4546',
+            ];
+
+            $bearerToken = $this->getToken();
+
+            $response = Http::withHeaders([
+                'Authorization' => "Bearer $bearerToken",
+            ])->post($url, $payload);
+
+            if ($response->status() == 401) {
+                $bearerToken = $this->getToken()['data']['token'];
+                file_put_contents('tokenfile.txt', $bearerToken);
+            }
+
+            // Save the SMS code in the database
+            $smsCode = new SmsCode;
+            $smsCode->user_id = $user->id;
+            $smsCode->phone = $request->phone;
+            $smsCode->code = $code;
+            $smsCode->save();
+            
+            $responseData = [
+                'user_id' => $user->id,
+                'code' => $code,
+                'phone' => $request->phone,
+                'name' => $user->fullname,
+            ];
+            return response()->json([
+                'message' => 'SMS yuborildi',
+                'data' => $responseData,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Xato: ' . $e->getMessage()], 400);
+        }
+    } else {
+        return response()->json([
+            'error' => 'User not found',
+        ], 404);
+    }
+}
+
+public function forget_password_update(Request $request){
+    $request->validate([
+     "user_id"=>'required',
+     "password"=>'required'
+    ]);
+    $user = User::where('id',$request->user_id)->first();
+    $user->update([
+        'password'=>$request->password
+    ]);
+    
+    return response()->json([
+        "message"=>"User update password",
+        "data"=> $user
+    ]);
+}
+
     private function getToken()
     {
         $fileContents = file_get_contents('tokenfile.txt');
@@ -107,37 +201,7 @@ class UserController extends Controller
     }
 
     public function smsCode(Request $request){
-        // $request->validate([
-        //     'phone'=>'required',
-        //     'code'=>'required',
-        // ]);
-        // $time = time();
-        // $user =  User::where('phone',$request->phone)->first();
-        // if($user){
-        //     if($time - $user->code_time_create <= 180){
-        //         if($user->code == $request->code){
-        //             $user->status = 'active';
-        //             $user->save();
-        //             return response([
-        //                 'succes'=>true,
-        //                 'message'=>'user active',
-        //                 'user'=>['phone'=>$user->phone,'name'=>$user->fullname]
-        //             ]);
-        //         }else{
-        //             return ' sms code xato';
-        //         }
-        //     }else{
-        //         return response([
-        //             'succes'=> false,
-        //             'message'=>'Code entry timed out'
-        //         ]);
-        //     }
-        // }else{
-        //     return response([
-        //         'succes'=> false,
-        //         'message'=>'You are not registered'
-        //     ]);
-        // }
+       return "salom";
     }
     /**
      * Display the specified resource.

@@ -18,11 +18,16 @@ return new class extends Migration
             $table->string("pick_up_address");
             $table->string("shipping_address");
             $table->string("date");
-            $table->string("time");
+            $table->integer("time");
             $table->string("description");
             $table->string("user_id");
             $table->string("role_id");
+            // $table->string("images");
             $table->string("status")->default("1");
+            $table->string("get_latitude");
+            $table->string("get_longitude");
+            $table->string("to_go_latitude");
+            $table->string("to_go_longitude");
             // $table->timestamps();
         });
     }

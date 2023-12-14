@@ -24,22 +24,26 @@ class MyAutoController extends Controller
             'tex_passport_number' => 'required',
             'transport_model' => 'required',
             'transport_capacity' => 'required',
-            'image' => 'required|mimes:jpeg,png,jpg,gif,svg,webp|max:2048'
+            'image' => 'required|mimes:jpeg,png,jpg,gif,svg,webp'
         ]);
+
         $data['user_id'] = Auth::id(); // Set the user ID
-        // dd($data);
+        
         // dd(auth()->user()->$request->user_id);
         $image = md5(rand(1111,9999).microtime()).'.'.$request->file('image')->extension();
         $request->file('image')->storeAs('/public/myAuto/',$image);
         // $auto->user_id = $data['user_id']
         $auto = new MyAuto;
         $auto->user_id = $data['user_id'];
-        $auto->image = $image;
+        $auto->image = '/storage/announcements/'.$image;
         $auto->tex_passport_number = $data['tex_passport_number'];
         $auto->transport_model = $data['transport_model'];
         $auto->transport_capacity = $data['transport_capacity'];
         $auto->save();
-        return response()->json($auto, 201);
+        return response()->json([
+            "message"=> "Create auto",
+            "data" =>$auto
+        ], 201);
     }
     public function update(Request $request, $id)
 {

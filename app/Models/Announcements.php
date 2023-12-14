@@ -11,6 +11,6 @@ class Announcements extends Model
     protected $guarded = ['id'];
     public $timestamps = false;
     public function images(){
-        return $this->hasMany(Apimage::class,'p_id');
+        return $this->hasMany(AImage::class,'p_id');
     }
 }

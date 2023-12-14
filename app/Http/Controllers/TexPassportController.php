@@ -38,13 +38,7 @@ class TexPassportController extends Controller
             
         ]);
         $data['user_id'] = Auth::id();
-        // Create a new Passport instance
         $texPassport = new TexPassport;
-
-        // Set the user_id if the user is authenticated
-        // if (Auth::check()) {
-        //     $passport->user_id = Auth::id();
-        // }
         $texPassport = TexPassport::where("user_id",$data['user_id'])->first();
         
         if ($texPassport) {

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\APimage;
+use App\Models\AImage;
 use Illuminate\Http\Request;
 
-class APimageController extends Controller
+class AImageController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class APimageController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(APimage $aPimage)
+    public function show(AImage $aImage)
     {
         //
     }
@@ -42,7 +42,7 @@ class APimageController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(APimage $aPimage)
+    public function edit(AImage $aImage)
     {
         //
     }
@@ -50,7 +50,7 @@ class APimageController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, APimage $aPimage)
+    public function update(Request $request, AImage $aImage)
     {
         //
     }
@@ -58,7 +58,7 @@ class APimageController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(APimage $aPimage)
+    public function destroy(AImage $aImage)
     {
         //
     }
