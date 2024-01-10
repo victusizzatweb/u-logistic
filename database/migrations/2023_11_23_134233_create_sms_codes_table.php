@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('sms_codes', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->string('phone');
             $table->string('code');
             $table->string('status')->default('pending');

@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('my_autos', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->integer('user_id');
             $table->string('image');
-            $table->string('tex_passport_number');
+            $table->string('transport_number');
             $table->string('transport_model');
             $table->string('transport_capacity');
             $table->timestamps();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
     

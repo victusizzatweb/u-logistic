@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Driver_license;
 use Illuminate\Http\Request;
 use Auth;
+use Illuminate\Support\Facades\Storage;
 class DriverLicenseController extends Controller
 {
     public function  __construct(){
@@ -30,50 +31,48 @@ class DriverLicenseController extends Controller
     {
         //
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
+    
     public function store(Request $request)
     {
-        // dd($request);
-        // Validate the incoming request data
-        $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+         $request->validate([
             'certificate_number' => 'required',
             'categories' => 'required',
-            // Add any additional validation rules for other fields
+            'image' => 'required|mimes:jpeg,png,jpg,gif,svg,webp'
         ]);
-
-        // Get the authenticated user
-        $user_id = Auth::id();
-        // dd($user_id);
-        $driverLicense = Driver_license::where("user_id",$user_id)->first();
-        // dd($driverLicense);
-
-        // Create a new instance of the DriverLicense model
-        $driverLicense = new Driver_license;
-
-        // Set the attributes of the model
-        $driverLicense->user_id = $user_id;
-        $driverLicense->certificate_number = $request->input('certificate_number');
-        $driverLicense->categories = $request->input('categories');
-
-        // Handle image upload
-        $image = md5(rand(1111, 9999) . microtime()) . '.' . $request->file('image')->extension();
-        $request->file('image')->storeAs('/public/driverLicense_images/', $image);
-        $driverLicense->image = '/storage/driverLicense_images/'.$image;
+        $id = Auth::id(); 
+        $result = Driver_license::where('user_id',$id)->first();
+       if ($result) {
+        if ($request->hasFile('image')) {
+                    if ($result->image) {
+                        Storage::delete('/public/driverLicense_images/' . $result->image);
+                    }
+                    $image = md5(rand(1111, 9999) . microtime()) . '.' . $request->file('image')->extension();
+                    $request->file('image')->storeAs('/public/driverLicense_images/', $image);
+                    $request->image = $image;
+                }
+        $result-> update([
+            'certificate_number' => $request->input('certificate_number'),
+            'categories' => $request->input('categories'),
+        ]);
+        $result->save();
+        return response()->json(['message' => 'Bor edi  yangilandi']);
+       }else{
         
-
-        // Save the model to the database
-        $driverLicense->save();
-        // dd($driverLicense);
-        // Optionally, you can redirect to a different page or return a response
-        return response()->json([
-            "success"=> 'Driver license created successfully',
-            "data"=>$driverLicense
+        $image = md5(rand(1111,9999).microtime()).'.'.$request->file('image')->extension();
+        $request->file('image')->storeAs('/public/driverLicense_images/',$image);
+        $auto = Driver_license::create([
+            'user_id' => $id,
+            'image'=>$image,
+            'certificate_number' => $request->input('certificate_number'),
+            'categories' => $request->input('categories'),
         ]);
+
+        return response()->json([
+            'data'=>$auto,
+            'message' => 'Model muvaffaqiyatli yaratildi'],200);
+       }
     }
+
 
     /**
      * Display the specified resource.

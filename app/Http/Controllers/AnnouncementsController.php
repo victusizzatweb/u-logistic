@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\AImage;
 use App\Models\Announcements;
 use App\Models\Role;
+use App\Models\User;
 use Auth;
+use App\Http\Resources\AnnouncementResource;
 use File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -17,135 +19,108 @@ class AnnouncementsController extends Controller
         $this->middleware("auth:sanctum");
 
     }
+    
     public function index()
     {
-        $result = Announcements::all();
-        return response()->json([
-            "data"=>$result
-        ]);
     }
     public function store(Request $request)
-    {
-       
-        $date = date('Y-m-d');
-        $time = time();
-        $request ->validate([
-            'name'=>'required',
-            'weight'=>'required',
-            'pick_up_address'=>'required',
-            'shipping_address'=>'required',
-            'description'=>'required',
-            'get_latitude'=>'required',
-            'get_longitude'=>'required',
-            'to_go_latitude'=>'required',
-            'to_go_longitude'=>'required',
+{
+    $date = now();
+    $time = date_format($date,'Y-m-d H:i:s');
+
+    $request->validate([
+        'name' => 'required',
+        'weight' => 'required',
+        'pick_up_address' => 'required',
+        'shipping_address' => 'required',
+        // 'description' => 'required',
+        // 'get_latitude' => 'required',
+        // 'get_longitude' => 'required',
+        // 'to_go_latitude' => 'required',
+        // 'to_go_longitude' => 'required',
+    ]);
+
+    $user_id = Auth::id();
+    $role = Auth::user()->role_id;
+
+    // Create announcement
+    $announcements = Announcements::create([
+        'name' => $request->name,
+        'weight' => $request->weight,
+        'pick_up_address' => $request->pick_up_address,
+        'shipping_address' => $request->shipping_address,
+        'get_latitude' => $request->get_latitude,
+        'get_longitude' => $request->get_longitude,
+        'to_go_latitude' => $request->to_go_latitude,
+        'to_go_longitude' => $request->to_go_longitude,
+        'description' => $request->description,
+        'price' => $request->price,
+        'time' => $time,
+        'user_id' => $user_id,
+        'role_id' => $role,
+        'status' => 1,
+    ]);
+
+    // Check if images are present
+    if ($request->hasFile('images')) {
+        $imageRules = [
+            'images.*' => 'image',
+        ];
+
+        $imageValidator = Validator::make($request->all(), $imageRules);
+
+        if ($imageValidator->fails()) {
+            return response()->json([
+                'messages' => $imageValidator->messages(),
+                'error' => 403,
+            ]);
+        }
+        foreach ($request->file('images') as $image) {
+            $path = md5(rand(1111, 9999) . microtime()) . "." . $image->extension();
+            $image->storeAs('public/announcements/', $path);
+            if ($path) {
+                AImage::create([
+                    'a_id' => $announcements->id,
+                    'path' => $path,
+                ]);
+            } else {
+                return response()->json([
+                    'error' => 'File upload failed',
+                ]);
+            }
+        }
+    }
+    $images = AImage::where('a_id', $announcements->id)->pluck('path')->toArray();
+
+    if ($announcements) {
+        $combinedData = $announcements->toArray() + ['images' => $images];
+        return response()->json([
+            'message' => 'Create successfully',
+            'data' => $combinedData,
         ]);
-        
-        $imageRules = array(
-            'images' => 'image',
-        );
-        if (is_array($request->images)) {
-            $imageCount = count($request->images);
-            for ($i = 0; $i < $imageCount; $i++) {
-                $image = ['images' => $request->images[$i]];
-                $imageValidator = Validator::make($image, $imageRules);
-                if ($imageValidator->fails()) {
-                    $messages = $imageValidator->messages();
-                    return response()->json([
-                        "messages" => $messages,
-                        'error' => 403
-                    ]);
-                }
-            }
-        } else {
-            return response()->json([
-                'error' => 'Invalid data format for images',
-            ]);
-        }
-
-        $user_id = Auth::id();
-        $role = Auth::user()->role_id;
-        
-        if($role != 'Haydovchi'){
-            $announcements= Announcements::create([
-                'name' => $request->name,
-                'weight'=> $request->weight,
-                'pick_up_address'=> $request->pick_up_address,
-                'shipping_address'=> $request->shipping_address,
-                'get_latitude' => $request->get_latitude,
-                'get_longitude'=> $request->get_longitude,
-                'to_go_latitude'=> $request->to_go_latitude,
-                'to_go_longitude'=> $request->to_go_longitude,
-                'date'=> $date,
-                'description'=> $request->description,
-                'time'=> $time,
-                'user_id'=>$user_id,
-                'role_id'=>$role,
-                'status'=>'1',
-               ]);
-            $imageCount = count($request->images);
-
-            for ($i = 0; $i < $imageCount; $i++) {
-                $image = $request->images[$i];
-                $path = md5(rand(1111,9999).microtime()).".".$image->extension();
-                // Generate a unique filename (Laravel will automatically handle this)
-                $image->storeAs('public/announcements/',$path);
-
-                // Check if the file was uploaded successfully
-                if ($path) {
-                    AImage::create([
-                        'a_id' => $announcements->id,
-                        'path' => '/storage/announcements/'.$path,
-                    ]);
-                } else {
-                    // Handle file upload failure
-                    return response()->json([
-                        'error' => 'File upload failed',
-                    ]);
-                }
-            }
-            //  $images = AImage::where('a_id',$announcements->id)->get();
-             $images = AImage::where('a_id', $announcements->id)->pluck('path')->toArray();
-                // dd($images);
-                 if ($announcements && $images) {
-                     $combinedData = $announcements->toArray() + ['images' => $images];
-                     
-                     return response()->json([ 
-                        "message"=>"create successfully",
-                         'data' => $combinedData,
-                     ]);
-                 } else {
-                     return response()->json([
-                         'error' => 'Announcement or images not found',
-                     ],403);
-                 }
-             
-        }else{
-            return response()->json([ 
-                'error'=>404,
-            ]);
-        }
-    
+    } else {
+        return response()->json([
+            'error' => 'Announcement not found',
+        ], 403);
     }
-    public function show(Announcements $announcements,$id)
-    {
-
-       
-        $announcements = Announcements::find($id);
-        $images = AImage::where('a_id', $id)->pluck('path')->toArray();
-    //    dd($images);
-        if ($announcements && $images) {
-            $combinedData = $announcements->toArray() + ['images' => $images];
-            
-            return response()->json([ 
-                'data' => $combinedData,
-            ]);
-        } else {
-            return response()->json([
-                'error' => 'Announcement or images not found',
-            ]);
-        }
+}
+public function show(Announcements $announcements, $id)
+{
+    $announcement = Announcements::where('id',$id)->with('user')->first();
+    if (!$announcement) {
+        return response()->json([
+            'error' => 'Not found'
+        ], 404);
     }
+    $user = User::find($announcement->user_id);
+    $responseData = [
+        "announcement" => new AnnouncementResource($announcement),
+    ];
+
+    return response()->json($responseData);
+}
+
+
     public function update(Request $request, Announcements $announcements, $id)
     {
     $announcements = Announcements::find($id);
@@ -182,7 +157,7 @@ class AnnouncementsController extends Controller
         $images = AImage::where('a_id', $id)->get();
 
         foreach ($images as $Aimage) {
-            File::delete(public_path('storage/announcements/' . $Aimage->path));
+            File::delete(public_path('storage/announcements/'.$Aimage->path));
         }
 
         AImage::where('a_id', $id)->delete();
@@ -193,7 +168,7 @@ class AnnouncementsController extends Controller
 
             AImage::create([
                 'a_id' => $id,
-                'path' => '/storage/announcements/'.$path,
+                'path' => $path,
             ]);
         }
     }
@@ -208,36 +183,48 @@ class AnnouncementsController extends Controller
         'to_go_latitude' => $request->to_go_latitude,
         'to_go_longitude' => $request->to_go_longitude,
         'description' => $request->description,
+        'price'=>$request->price,
         'date' => $date,
         'user_id' => $user_id,
         'role_id' => $role,
         'status' => '1',
     ]);
-    // dd($announcements);
     $images = AImage::where('a_id', $announcements->id)->pluck('path')->toArray();
-                // dd($images);
-                 if ($announcements && $images) {
-                     $combinedData = $announcements->toArray() + ['images' => $images];
-                     
-                     return response()->json([ 
-                         'data' => $combinedData,
-                     ]);
-                 } else {
-                     return response()->json([
-                         'error' => 'Announcement or images not found',
-                     ],403);
-                 }
+        if ($announcements && $images) {
+            $combinedData = $announcements->toArray() + ['images' => $images];
+            
+            return response()->json([ 
+                'data' => $combinedData,
+            ]);
+        } else {
+            return response()->json([
+                'error' => 'Announcement or images not found',
+            ],403);
+        }
 }
 
 
-    public function customer_announcements(Announcements $announcements)
-    {
-        $id = Auth::id();
-       $result = Announcements::where('user_id',$id)->get();
-       
-       return response()->json([
-        "data"=>$result
-    ]);
+    public function customer_announcements(Announcements $announcements ,$id)
+    { 
+       $user = Auth::id();
+      
+       if( $user && $id == 2){
+        $result =  AnnouncementResource::collection(Announcements::where('user_id',$user)->where('status',2)->get());
+        return response()->json([
+            "data"=>$result
+        ],200);
+    }
+        elseif( $user && $id == 3){
+        $result = AnnouncementResource::collection(Announcements::where('user_id',$user)->where('status',4)->get());
+        return response()->json([
+            "data"=>$result
+        ],200);
+       }elseif($user && $id == 1){
+        $result = AnnouncementResource::collection(Announcements::where('user_id',$user)->get());
+        return response()->json([
+            "data"=>$result
+        ],200);
+       }
     }
     public function destroy($id)
 {
@@ -250,14 +237,9 @@ class AnnouncementsController extends Controller
             'error' => 'Announcement not found',
         ], 404);
     }
-
-    // Check if the authenticated user has the right role to delete
     $userRole = Auth::user()->role_id;
-    if ($userRole != 'Haydovchi') {
-        // Delete the associated images first
+    if ($userRole != '2') {
         AImage::where('a_id', $announcement->id)->delete();
-
-        // Then delete the announcement
         $announcement->delete();
 
         return response()->json([
@@ -269,5 +251,6 @@ class AnnouncementsController extends Controller
         ], 403);
     }
 }
-
+   
+    
 }

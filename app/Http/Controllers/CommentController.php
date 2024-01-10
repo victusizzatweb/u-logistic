@@ -1,57 +1,32 @@
 <?php
 
+// app/Http/Controllers/CommentController.php
+
 namespace App\Http\Controllers;
 
+use App\Events\CommentPosted;
 use App\Models\Comment;
-use App\Models\Order;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function store(Request $request)
     {
-        $comments = Comment::all();
-        return response()->json([
-            "data"=>$comments
+        $comment = Comment::create([
+            'announcement_id' => $request->announcement_id,
+            'user_id' => auth()->id(),
+            'content' => $request->content,
         ]);
+
+        broadcast(new CommentPosted($comment));
+
+        return response()->json($comment);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function store(Request $request,$id)
+    public function index($announcementId)
     {
-        dd($request);
-        $request->validate([
-            'text'=>'required',
-        ]);
+        $comments = Comment::where('announcement_id', $announcementId)->get();
 
-       dd($request);
-        
-        if (Auth::check()) 
-        {
-           
-        
-        $id = Order::findOrFail($id);
-         $comment =  Comment::create([
-            'text'=>$request->text,
-            'order_id'=>$id,
-            'user_id'=>Auth::user()->id
-        ]);
-        
-       }
-       return response()->json([
-        "success"=>'comment successfuly',
-        "data"=> $comment
-       ]);
+        return response()->json($comments);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    
 }

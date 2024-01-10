@@ -15,9 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('fullname');
             $table->string('phone');
-            $table->string('status')->default('pending');
-            $table->string('token')->nullable();
-            $table->text('role_id');
+            $table->integer('status')->default(1);
+            $table->integer('role_id');
             $table->string('password')->nullable();
             $table->rememberToken();
             $table->timestamps();

@@ -65,7 +65,7 @@ class TexPassportController extends Controller
                 $texPassport->save();
             return response()->json([
                 "success"=>"bor edi update qildim",
-                "message"=>$texPassport, 201]);
+                "message"=>$texPassport],200);
             }
         }else{
             $texPassport = new TexPassport;
@@ -89,7 +89,7 @@ class TexPassportController extends Controller
     
             return response()->json([ 
                 "message"=> "bu user yoq ekan qoshdim",
-                "data"=>$texPassport, 201]);
+                "data"=>$texPassport],200);
 
     
      }

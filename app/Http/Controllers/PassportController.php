@@ -21,7 +21,7 @@ class PassportController extends Controller
     {
         $passport = Passport::all();
         return response()->json([ 
-            "data"=>$passport, 201]);
+            "data"=>$passport],200);
         
     }
 
@@ -72,7 +72,7 @@ class PassportController extends Controller
                 $passport->save();
             return response()->json([
                 "success"=>"bor edi update qildim",
-                "message"=>$passport, 201]);
+                "message"=>$passport],200);
             }
         }else{
             $passport = new Passport;
@@ -96,7 +96,7 @@ class PassportController extends Controller
     
             return response()->json([ 
                 "message"=> "bu user yoq ekan qoshdim",
-                "data"=>$passport, 201]);
+                "data"=>$passport],200);
 
     
      }

@@ -13,62 +13,61 @@ class AuthController extends Controller
 {
    
     public function login(LoginRequest $request){
-    
-
         $user = User::where('phone', $request->phone)->first();
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-           return response()->json([
-            'phone' => 'The provided credentials are incorrect.',
-           ],404);
+        if($user &&  Hash::check($request->password, $user->password)){
+            $responseData = [
+                'id'=>$user->id,
+                'token'=>$user->remember_token,
+                'fullname'=>$user->fullname,
+                'role_id'=>$user->role_id,
+                'phone'=>$user->phone,
+                
+            ];
+            // dd($responseData);
+            return response()->json([
+                "data"=>$responseData
+            ]);
         }
-       
-        $accessToken = $user->createToken($request->phone)->plainTextToken;
-  
-       $user->update([
-        "token"=>$accessToken,
-       ]);
-       $user->save();
-    
-        return response()->json([
-            'token' => $accessToken
-        ]);
+        elseif (!$user) {
+           return response()->json([
+            'message' => 'Phone are incorrect.',
+           ],401);
+        }else{
+            return response()->json([
+                'message' => 'Password incorrect',
+               ],403);
+        }
        }
        public function updateToken(Request $request)
-     {
-    // Get the authenticated user
-    $user = Auth::user();
+        {
+        // Get the authenticated user
+        $user = Auth::user();
 
-    // Create a new token for the user
-    $accessToken = $user->createToken($request->phone)->plainTextToken;
+        // Create a new token for the user
+        $accessToken = $user->createToken($request->phone)->plainTextToken;
 
-    // Update the user's token in the database
-    $user->update([
-        'token' => $accessToken,
-    ]);
+        // Update the user's token in the database
+        $user->update([
+            'token' => $accessToken,
+        ]);
 
-    return response()->json([
-        'token' => $accessToken,
-    ]);
-}
+        return response()->json([
+            'token' => $accessToken,
+        ]);
+    }
 
    public function logout(Request $request)
    {
     
     
-       $user = $request->user();
-    //    dd($user->token);
-       // Revoke the user's access tokens
-       $user->token->delete();
-   
-       // Optionally, you can also revoke the user's refresh tokens
-       // $user->refreshTokens()->delete();
-   
-       return response()->json([
+    //    Auth::id()->logout();
+       
+         return response()->json([
            'message' => 'User logged out successfully',
        ]);
    }
    public function user(Request $request){
-    // // return "ishlayapdi";
+    // return "ishlayapdi";
     return $request->user();
    }
   

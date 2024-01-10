@@ -1,4 +1,38 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .image-wrapper{
+            background-image: url("../image/Frame 2.jpg");
+            background-repeat: no-repeat;
+            background-size: contain;
+            width: 100vw;
+            height: 100vh;
+        }
+        .body{
+            text-align: center;
+            align-items: center;
+            color: green;
+            font-family: 'Times New Roman', Times, serif
+        }
+    </style>
+ </head>
+ <body>
+    <div class="image-wrapper" style="background-image: url('../image/Frame 2.jpg');">
+        <h1 class="body" >MLC  "Muslim Logistik Center"</h1>
+    </div>
+ </body>
+ 
+ </html>
+ 
+
+
+
+{{-- <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
@@ -137,4 +171,4 @@
             </div>
         </div>
     </body>
-</html>
+</html> --}}

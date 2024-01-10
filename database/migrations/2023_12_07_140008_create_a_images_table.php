@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('a_images', function (Blueprint $table) {
             $table->integer('a_id');
-            $table->string('path');
+            $table->string('path')->nullable();
         });
     }
 

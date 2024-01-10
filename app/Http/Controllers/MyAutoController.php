@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Http\Resources\MyAutoResource;
 use App\Models\MyAuto;
 use Auth;
 use Illuminate\Http\Request;
@@ -14,79 +15,58 @@ class MyAutoController extends Controller
 
     }
     public function index(){
-        $auto = MyAuto::all();
-        return $auto;
+        $all = MyAutoResource::collection(MyAuto::all());
+        return $all;
     }
     public function store(Request $request)
     {
-       
-        $data = $request->validate([
-            'tex_passport_number' => 'required',
+    //    dd($request);
+         $request->validate([
+            'transport_number' => 'required',
             'transport_model' => 'required',
             'transport_capacity' => 'required',
             'image' => 'required|mimes:jpeg,png,jpg,gif,svg,webp'
         ]);
-
-        $data['user_id'] = Auth::id(); // Set the user ID
+        $id = Auth::id(); 
+        $result = MyAuto::where('user_id',$id)->first();
+       if ($result) {
+        if ($request->hasFile('image')) {
+                    // Delete the old image if it exists
+                    if ($result->image) {
+                        Storage::delete('/public/myAuto/' . $result->image);
+                    }
+            
+                    // Upload the new image
+                    $image = md5(rand(1111, 9999) . microtime()) . '.' . $request->file('image')->extension();
+                    $request->file('image')->storeAs('/public/myAuto/', $image);
+                    $request->image = $image;
+                }
+        $result-> update([
+            
+            'transport_number' => $request->input('transport_number'),
+            'transport_model' => $request->input('transport_model'),
+            'transport_capacity'=>$request->input('transport_capacity')
+        ]);
+        $result->save();
+        return response()->json(['message' => 'Bor edi  yangilandi']);
+       }else{
         
-        // dd(auth()->user()->$request->user_id);
         $image = md5(rand(1111,9999).microtime()).'.'.$request->file('image')->extension();
         $request->file('image')->storeAs('/public/myAuto/',$image);
-        // $auto->user_id = $data['user_id']
-        $auto = new MyAuto;
-        $auto->user_id = $data['user_id'];
-        $auto->image = '/storage/announcements/'.$image;
-        $auto->tex_passport_number = $data['tex_passport_number'];
-        $auto->transport_model = $data['transport_model'];
-        $auto->transport_capacity = $data['transport_capacity'];
-        $auto->save();
+        $auto = MyAuto::create([
+            'user_id' => $id,
+            'image'=>$image,
+            'transport_number' => $request->input('transport_number'),
+            'transport_model' => $request->input('transport_model'),
+            'transport_capacity'=>$request->input('transport_capacity')
+        ]);
+
         return response()->json([
-            "message"=> "Create auto",
-            "data" =>$auto
-        ], 201);
-    }
-    public function update(Request $request, $id)
-{
-    $auto = MyAuto::findOrFail($id);
-    
-    $data = $request->validate([
-        'tex_passport_number' => 'required',
-        'transport_model' => 'required',
-        'transport_capacity' => 'required',
-        'image' => 'sometimes|required|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
-    ]);
-
-    // Update user_id if needed
-    if (Auth::check()) {
-        $data['user_id'] = Auth::id();
+            'data'=>$auto,
+            'message' => 'Model muvaffaqiyatli yaratildi'],200);
+       }
     }
 
-    // Update image if provided
-    if ($request->hasFile('image')) {
-        // Delete the old image if it exists
-        if ($auto->image) {
-            Storage::delete('/public/myAuto/' . $auto->image);
-        }
-
-        // Upload the new image
-        $image = md5(rand(1111, 9999) . microtime()) . '.' . $request->file('image')->extension();
-        $request->file('image')->storeAs('/public/myAuto/', $image);
-        $auto->image = $image;
-    }
-
-    // Update other fields
-    $auto->tex_passport_number = $data['tex_passport_number'];
-    $auto->transport_model = $data['transport_model'];
-    $auto->transport_capacity = $data['transport_capacity'];
-
-    // Save the changes
-    $auto->save();
-
-    return response()->json([
-       "success" => true,
-        "data" =>$auto, 200]);
-}
-    
     public function show(MyAuto $myAuto)
     {
         return response()->json($myAuto, 200);
@@ -104,11 +84,5 @@ class MyAutoController extends Controller
                 'message' => 'User deleted successfully.'
             ]);
             
-        // } catch (\Exception $e) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'An error occurred while deleting the user.'
-        //     ], 500);
-        // }
     }
 }

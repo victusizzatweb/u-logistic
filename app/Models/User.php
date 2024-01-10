@@ -30,7 +30,7 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
-        'token',
+        'remember_token',
     ];
 
     /**
@@ -45,5 +45,9 @@ class User extends Authenticatable
     public function role(){
         return $this->hasMany(Role::class);
     }
-    
+   
+    public function announcements()
+    {
+        return $this->hasMany(Announcements::class);
+    }
 }
