@@ -81,4 +81,5 @@ Route::get('confirmation_announcement/{id}',[DriverRequestController::class,'con
 Route::get('finish_announcement/{id}',[DriverRequestController::class,'finish_announcement']);
 Route::get('DriverDataAnnouncement/{id}',[DriverRequestController::class,'DriverDataAnnouncement']);
 Route::post('coHub',[CoHubController::class,'store']);
-// Route::get('/filtered', [CurrencyController::class, 'getFilteredExchangeRates']);
+Route::get('/search', [AnnouncementsController::class, 'search']);
+Route::get('/ordersSearch', [DriverRequestController::class, 'search']);

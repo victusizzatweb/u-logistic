@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('driver_id');
             $table->integer('announcement_id');
+            $table->decimal('price')->nullable();
             $table->string('time');
             $table->integer('status')->default(1);
             $table->timestamps();

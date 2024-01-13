@@ -20,6 +20,7 @@ class MyAutoController extends Controller
     }
     public function store(Request $request)
     {
+        
     //    dd($request);
          $request->validate([
             'transport_number' => 'required',
